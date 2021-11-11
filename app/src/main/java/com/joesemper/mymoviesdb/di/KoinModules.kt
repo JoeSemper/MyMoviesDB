@@ -4,6 +4,7 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import com.joesemper.mymoviesdb.data.datasource.MoviesRepositoryRetrofitImpl
 import com.joesemper.mymoviesdb.data.repository.MoviesRepository
 import com.joesemper.mymoviesdb.ui.viewmodel.HomeViewModel
+import com.joesemper.mymoviesdb.ui.viewmodel.MovieViewModel
 import org.koin.dsl.module
 
 val appModule = module {
@@ -12,4 +13,5 @@ val appModule = module {
 
 val mainActivity = module {
     viewModel { HomeViewModel(get()) }
+    viewModel { MovieViewModel(get()) }
 }

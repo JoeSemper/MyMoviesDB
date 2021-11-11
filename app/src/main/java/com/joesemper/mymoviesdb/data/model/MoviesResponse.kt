@@ -4,6 +4,6 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-class ServerResponse(
+data class MoviesResponse(
     val results: List<Result> = listOf()
 ) : Parcelable

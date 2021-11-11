@@ -4,7 +4,7 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-class Result(
+data class Result(
     val adult: Boolean = false,
     val backdropPath: String = "",
     val genreIds: List<Int> = listOf(),

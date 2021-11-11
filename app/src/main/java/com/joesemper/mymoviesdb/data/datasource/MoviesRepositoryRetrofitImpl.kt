@@ -14,6 +14,8 @@ class MoviesRepositoryRetrofitImpl: MoviesRepository {
 
     override suspend fun getPopularMovies() = getService().getPopularMovies()
 
+    override suspend fun getMovieDetails(movieId: String) = getService().getMovieDetails(movieId)
+
     private fun getService(): MovieDatabaseApiService {
         return createRetrofit().create(MovieDatabaseApiService::class.java)
     }
