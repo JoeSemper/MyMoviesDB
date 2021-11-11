@@ -1,7 +1,7 @@
 package com.joesemper.mymoviesdb.data.api
 
 import com.joesemper.mymoviesdb.data.model.Movie
-import com.joesemper.mymoviesdb.data.model.MoviesResponse
+import com.joesemper.mymoviesdb.data.model.MoviesResult
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -14,7 +14,7 @@ interface MovieDatabaseApiService {
         @Query("sort_by") sortBy: String = "popularity.desc",
         @Query("include_adult") includeAdult: Boolean = false,
         @Query("page") page: Int = 1
-    ): MoviesResponse
+    ): MoviesResult
 
     @GET("movie/{movie_id}")
     suspend fun getMovieDetails(
