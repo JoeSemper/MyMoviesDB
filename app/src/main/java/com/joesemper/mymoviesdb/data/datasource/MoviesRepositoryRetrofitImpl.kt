@@ -12,7 +12,7 @@ class MoviesRepositoryRetrofitImpl: MoviesRepository {
         private const val BASE_WEATHER_URL = "https://api.themoviedb.org/3/"
     }
 
-    override suspend fun getPopularMovies() = getService().getPopularMovies()
+    override suspend fun getPopularMovies(page: Int) = getService().getPopularMovies(page = page)
 
     override suspend fun getMovieDetails(movieId: String) = getService().getMovieDetails(movieId)
 

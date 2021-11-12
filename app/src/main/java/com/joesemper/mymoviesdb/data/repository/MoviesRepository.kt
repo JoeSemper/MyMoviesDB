@@ -4,6 +4,6 @@ import com.joesemper.mymoviesdb.data.model.Movie
 import com.joesemper.mymoviesdb.data.model.MoviesResult
 
 interface MoviesRepository {
-    suspend fun getPopularMovies(): MoviesResult
+    suspend fun getPopularMovies(page: Int): MoviesResult
     suspend fun getMovieDetails(movieId: String): Movie
 }
