@@ -35,6 +35,7 @@ fun DefaultAppBar(
     actions: @Composable() (RowScope.() -> Unit) = {}
 ) {
     TopAppBar(
+        modifier = modifier,
         title = { Text(text = title) },
         navigationIcon = navigationIcon,
         elevation = 4.dp,
@@ -55,7 +56,7 @@ fun LoadingScreen() {
 @Composable
 fun DefaultCard(
     modifier: Modifier = Modifier,
-    onClick: () -> Unit,
+    onClick: () -> Unit = {},
     content: @Composable () -> Unit
 ) {
     Card(
@@ -144,12 +145,17 @@ fun SubtitleItem(
 
 @Composable
 fun DefaultNavigationIcon(
+    modifier: Modifier = Modifier,
     navIcon: ImageVector = Icons.Default.ArrowBack,
     onNavClick: () -> Unit = {},
 ) {
-    IconButton(onClick = { onNavClick() }) {
+    IconButton(
+        modifier = modifier.size(48.dp),
+        onClick = { onNavClick() }
+    ) {
         Icon(
             imageVector = navIcon,
+            tint = Color.White,
             contentDescription = stringResource(R.string.back)
         )
     }

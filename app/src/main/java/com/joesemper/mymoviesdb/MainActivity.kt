@@ -3,11 +3,8 @@ package com.joesemper.mymoviesdb
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -21,6 +18,7 @@ import com.joesemper.mymoviesdb.utils.MOVIE_SCREEN
 
 class MainActivity : ComponentActivity() {
 
+    @ExperimentalAnimationApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -30,6 +28,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @ExperimentalAnimationApi
     @Composable
     fun Navigation() {
         val navController = rememberNavController()
@@ -37,12 +36,14 @@ class MainActivity : ComponentActivity() {
             navController = navController,
             startDestination = HOME_SCREEN
         ) {
-            composable(HOME_SCREEN) {
+            composable(
+                route = HOME_SCREEN,
+            ) {
                 HomeScreen(navController = navController)
             }
             composable(
-                "$MOVIE_SCREEN/{movieId}",
-                arguments = listOf(navArgument("movieId") { type = NavType.StringType })
+                route = "$MOVIE_SCREEN/{movieId}",
+                arguments = listOf(navArgument("movieId") { type = NavType.StringType }),
             ) { backStackEntry ->
                 MovieScreen(
                     navController = navController,
