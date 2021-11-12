@@ -3,20 +3,18 @@ package com.joesemper.mymoviesdb.ui.compose
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
@@ -40,9 +38,6 @@ fun HomeScreen(navController: NavController) {
         modifier = Modifier.fillMaxSize(),
         topBar = {
             DefaultAppBar(
-                onNavClick = {
-                    navController.popBackStack()
-                },
                 title = stringResource(R.string.app_name)
             )
         }
@@ -136,16 +131,32 @@ fun MovieItem(
         onClick = {
             onItemClick(movie.id)
         }) {
-        Image(
-            painter = rememberImagePainter(
-                data = BASE_IMG_URL + movie.poster_path,
-            ),
-            contentDescription = stringResource(R.string.photo),
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(RoundedCornerShape(5.dp))
-        )
 
+        Column() {
+            Box(modifier = Modifier.weight(8f)) {
+                Image(
+                    painter = rememberImagePainter(
+                        data = BASE_IMG_URL + movie.poster_path,
+                    ),
+                    contentDescription = stringResource(R.string.photo),
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .zIndex(-1.0f)
+                        .fillMaxSize()
+                )
+                RatingItem(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(4.dp),
+                    score = movie.vote_average
+                )
+            }
+            SubtitleItem(
+                modifier = Modifier.weight(1.2f),
+                title = movie.title
+            )
+        }
     }
+
+
 }
