@@ -7,4 +7,5 @@ class MovieViewModel(private val repository: MoviesRepository) : ViewModel() {
 
     suspend fun getMoviesDetails(movieId: String) = repository.getMovieDetails(movieId)
 
+    suspend fun getMoviesCast(movieId: String) = repository.getMovieCast(movieId)
 }

@@ -2,6 +2,7 @@ package com.joesemper.mymoviesdb.data.datasource
 
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.joesemper.mymoviesdb.data.api.MovieDatabaseApiService
+import com.joesemper.mymoviesdb.data.model.CastResult
 import com.joesemper.mymoviesdb.data.repository.MoviesRepository
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -15,6 +16,8 @@ class MoviesRepositoryRetrofitImpl: MoviesRepository {
     override suspend fun getPopularMovies(page: Int) = getService().getPopularMovies(page = page)
 
     override suspend fun getMovieDetails(movieId: String) = getService().getMovieDetails(movieId)
+
+    override suspend fun getMovieCast(movieId: String) = getService().getMovieCast(movieId)
 
     private fun getService(): MovieDatabaseApiService {
         return createRetrofit().create(MovieDatabaseApiService::class.java)

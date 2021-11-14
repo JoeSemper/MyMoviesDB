@@ -3,54 +3,42 @@ package com.joesemper.mymoviesdb.ui.compose
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
+import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
+import coil.request.ImageRequest
 import com.joesemper.mymoviesdb.R
-import com.joesemper.mymoviesdb.data.model.Movie
+import com.joesemper.mymoviesdb.data.model.*
 import com.joesemper.mymoviesdb.ui.theme.PrimaryColor
-import com.joesemper.mymoviesdb.ui.theme.PrimaryColorTransparent
-import com.joesemper.mymoviesdb.ui.theme.SecondaryColorTransparent
 import com.joesemper.mymoviesdb.ui.viewmodel.MovieViewModel
 import com.joesemper.mymoviesdb.utils.BASE_IMG_URL
-import okhttp3.internal.wait
 import org.koin.androidx.compose.getViewModel
 import java.lang.Float.min
 
-private const val MinHeight = 56f
-private const val MaxHeight = 300f
-
-private const val MinAlpha = 0.1f
-private const val MaxAlpha = 1f
-
+@ExperimentalCoilApi
 @RequiresApi(Build.VERSION_CODES.N)
 @Composable
 fun MovieScreen(
@@ -63,9 +51,14 @@ fun MovieScreen(
         mutableStateOf<Movie?>(null)
     }
 
+    val cast = remember {
+        mutableStateOf<CastResult?>(null)
+    }
+
     LaunchedEffect(movieId) {
         movieId?.let {
             movie.value = viewModel.getMoviesDetails(movieId = it)
+            cast.value = viewModel.getMoviesCast(movieId = it)
         }
     }
 
@@ -76,13 +69,16 @@ fun MovieScreen(
         1 - (scrollState.firstVisibleItemScrollOffset / 600f + scrollState.firstVisibleItemIndex)
     )
 
-    movie.value?.let {
+    movie.value?.let { film ->
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
                 MovieDetailsCollapsingToolbar(
-                    movie = it,
-                    scrollOffset = scrollOffset
+                    movie = film,
+                    scrollOffset = scrollOffset,
+                    onNavClick = {
+                        navController.popBackStack()
+                    }
                 )
             }
         ) {
@@ -92,11 +88,20 @@ fun MovieScreen(
                     .fillMaxSize(),
                 state = scrollState
             ) {
-                items(20) {
-                    Spacer(modifier = Modifier.size(100.dp))
-                    Text(text = "Hello Scroll $it")
+                item {
+                    FilmOverview(overview = film.overview)
                 }
-
+                item {
+                    FilmGenres(genres = film.genres)
+                }
+                item {
+                    FilmCompanies(companies = film.production_companies)
+                }
+                cast.value?.let {
+                    item {
+                        FilmCast(cast = it.cast)
+                    }
+                }
             }
 
         }
@@ -104,13 +109,21 @@ fun MovieScreen(
 
 }
 
+@ExperimentalCoilApi
 @Composable
-private fun MovieDetailsCollapsingToolbar(movie: Movie, scrollOffset: Float) {
-    val imageSize by animateDpAsState(targetValue = max(72.dp, 128.dp * scrollOffset))
-    val toolbarHeight by animateDpAsState(targetValue = max(0.dp, 300.dp * scrollOffset))
-    val dynamicAlpha by animateFloatAsState(targetValue = kotlin.math.min(1f, scrollOffset))
-    val dynamicLines = kotlin.math.max(3f, scrollOffset * 6).toInt()
+private fun MovieDetailsCollapsingToolbar(
+    movie: Movie,
+    scrollOffset: Float,
+    onNavClick: () -> Unit
+) {
+    val toolbarHeight by animateDpAsState(
+        targetValue = if (max(200.dp, 300.dp * scrollOffset) > 200.dp) {
+            (max(150.dp, 300.dp * scrollOffset))
+        } else {
+            0.dp
+        }
 
+    )
 
     Column(
         modifier = Modifier
@@ -120,6 +133,8 @@ private fun MovieDetailsCollapsingToolbar(movie: Movie, scrollOffset: Float) {
     ) {
         Row(
             modifier = Modifier
+                .background(color = PrimaryColor)
+                .zIndex(1f)
                 .height(56.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
@@ -127,7 +142,8 @@ private fun MovieDetailsCollapsingToolbar(movie: Movie, scrollOffset: Float) {
             DefaultNavigationIcon(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(4.dp)
+                    .padding(4.dp),
+                onNavClick = onNavClick
             )
             Text(
                 modifier = Modifier
@@ -148,17 +164,18 @@ private fun MovieDetailsCollapsingToolbar(movie: Movie, scrollOffset: Float) {
     }
 }
 
+@ExperimentalCoilApi
 @Composable
 fun MainFilmInformation(
     modifier: Modifier = Modifier,
     movie: Movie
 ) {
-    ConstraintLayout(modifier = modifier.fillMaxWidth()) {
+    ConstraintLayout(modifier = modifier.fillMaxWidth().zIndex(0f)) {
         val (poster, score, date, budget, runtime, status, language) = createRefs()
 
         DefaultCard(
             Modifier
-                .fillMaxHeight()
+                .height(267.dp)
                 .width(170.dp)
                 .padding(horizontal = 8.dp, vertical = 20.dp)
                 .constrainAs(poster) {
@@ -172,7 +189,7 @@ fun MainFilmInformation(
                     data = BASE_IMG_URL + movie.poster_path,
                 ),
                 contentDescription = stringResource(R.string.photo),
-                contentScale = ContentScale.Crop,
+                contentScale = ContentScale.FillWidth,
                 modifier = Modifier
                     .zIndex(-1.0f)
                     .fillMaxSize()
@@ -242,6 +259,134 @@ fun MainFilmInformation(
 
     }
 }
+
+@Composable
+fun FilmOverview(modifier: Modifier = Modifier, overview: String) {
+    DefaultCard(modifier = modifier.padding(horizontal = 4.dp, vertical = 8.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "Overview",
+                style = MaterialTheme.typography.h6,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.padding(4.dp))
+            Divider()
+            Spacer(modifier = Modifier.padding(4.dp))
+            Text(text = overview)
+        }
+
+
+    }
+}
+
+@Composable
+fun FilmGenres(modifier: Modifier = Modifier, genres: List<Genre>) {
+    DefaultCard(modifier = modifier.padding(horizontal = 4.dp, vertical = 8.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "Genres",
+                style = MaterialTheme.typography.h6,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.padding(4.dp))
+            Divider()
+            Spacer(modifier = Modifier.padding(4.dp))
+            genres.forEach {
+                Text(text = it.name)
+            }
+
+        }
+    }
+}
+
+@ExperimentalCoilApi
+@Composable
+fun FilmCompanies(modifier: Modifier = Modifier, companies: List<ProductionCompany>) {
+    DefaultCard(modifier = modifier.padding(horizontal = 4.dp, vertical = 8.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "Companies",
+                style = MaterialTheme.typography.h6,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.padding(4.dp))
+            Divider()
+            Spacer(modifier = Modifier.padding(4.dp))
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(companies.size) { index ->
+                    Column(
+                        modifier = Modifier
+                            .width(80.dp)
+                            .height(140.dp)
+                    ) {
+                        Image(
+                            painter = rememberImagePainter(
+                                data = BASE_IMG_URL + companies[index].logo_path
+                            ),
+                            contentDescription = stringResource(R.string.photo),
+                            contentScale = ContentScale.Inside,
+                            modifier = Modifier
+                                .zIndex(-1.0f)
+                                .weight(6f)
+                                .fillMaxSize()
+                        )
+                        Text(
+                            modifier = Modifier.weight(2f),
+                            text = companies[index].name,
+                            style = MaterialTheme.typography.body2,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@ExperimentalCoilApi
+@Composable
+fun FilmCast(modifier: Modifier = Modifier, cast: List<Cast>) {
+    DefaultCard(modifier = modifier.padding(horizontal = 4.dp, vertical = 8.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "Cast",
+                style = MaterialTheme.typography.h6,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.padding(4.dp))
+            Divider()
+            Spacer(modifier = Modifier.padding(4.dp))
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(cast.size) { index ->
+                    Column(
+                        modifier = Modifier
+                            .width(80.dp)
+                            .height(140.dp)
+                    ) {
+                        Image(
+                            painter = rememberImagePainter(
+                                data = BASE_IMG_URL + cast[index].profile_path,
+                            ),
+                            contentDescription = stringResource(R.string.photo),
+                            contentScale = ContentScale.Inside,
+                            modifier = Modifier
+                                .zIndex(-1.0f)
+                                .weight(6f)
+                                .fillMaxSize()
+                        )
+                        Text(
+                            modifier = Modifier.weight(2f),
+                            text = cast[index].name,
+                            style = MaterialTheme.typography.body2,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 
 

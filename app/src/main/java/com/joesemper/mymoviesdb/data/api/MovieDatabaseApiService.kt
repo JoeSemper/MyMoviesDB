@@ -1,5 +1,6 @@
 package com.joesemper.mymoviesdb.data.api
 
+import com.joesemper.mymoviesdb.data.model.CastResult
 import com.joesemper.mymoviesdb.data.model.Movie
 import com.joesemper.mymoviesdb.data.model.MoviesResult
 import retrofit2.http.GET
@@ -22,5 +23,12 @@ interface MovieDatabaseApiService {
         @Query("api_key") apiKey: String = "274f828ad283bd634ef4fc1ee4af255f",
         @Query("language") language: String = "en-US",
     ): Movie
+
+    @GET("movie/{movie_id}/credits")
+    suspend fun getMovieCast(
+        @Path("movie_id") movieId: String,
+        @Query("api_key") apiKey: String = "274f828ad283bd634ef4fc1ee4af255f",
+        @Query("language") language: String = "en-US",
+    ): CastResult
 
 }

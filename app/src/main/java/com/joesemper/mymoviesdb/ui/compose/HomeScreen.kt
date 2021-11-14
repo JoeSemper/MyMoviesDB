@@ -3,14 +3,12 @@ package com.joesemper.mymoviesdb.ui.compose
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -20,6 +18,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
+import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.joesemper.mymoviesdb.R
 import com.joesemper.mymoviesdb.data.model.Result
@@ -28,6 +27,7 @@ import com.joesemper.mymoviesdb.utils.BASE_IMG_URL
 import com.joesemper.mymoviesdb.utils.MOVIE_SCREEN
 import org.koin.androidx.compose.getViewModel
 
+@ExperimentalCoilApi
 @Composable
 fun HomeScreen(navController: NavController) {
     val viewModel: HomeViewModel = getViewModel()
@@ -58,6 +58,7 @@ fun HomeScreen(navController: NavController) {
     }
 }
 
+@ExperimentalCoilApi
 @Composable
 fun MoviesList(
     modifier: Modifier = Modifier,
@@ -98,6 +99,7 @@ fun MoviesList(
     }
 }
 
+@ExperimentalCoilApi
 @Composable
 fun MoviesRowItem(
     movies: List<Result>?,
@@ -120,6 +122,7 @@ fun MoviesRowItem(
     }
 }
 
+@ExperimentalCoilApi
 @Composable
 fun MovieItem(
     modifier: Modifier = Modifier,
@@ -127,7 +130,7 @@ fun MovieItem(
     onItemClick: (Int) -> Unit,
 ) {
     DefaultCard(
-        modifier = modifier.height(300.dp),
+        modifier = modifier.height(330.dp),
         onClick = {
             onItemClick(movie.id)
         }) {
@@ -139,7 +142,7 @@ fun MovieItem(
                         data = BASE_IMG_URL + movie.poster_path,
                     ),
                     contentDescription = stringResource(R.string.photo),
-                    contentScale = ContentScale.Crop,
+                    contentScale = ContentScale.FillWidth,
                     modifier = Modifier
                         .zIndex(-1.0f)
                         .fillMaxSize()
